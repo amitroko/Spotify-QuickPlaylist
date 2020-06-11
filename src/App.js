@@ -7,10 +7,9 @@ import qplogo from './qp2.png';
 const spotifyWebAPI = new SpotifyWebApi();
 const client_id = process.env.REACT_APP_CLIENT_ID;
 const redirect = process.env.REACT_APP_REDIRECT;
-const port = process.env.PORT || 3000;
 const authURL = 'https://accounts.spotify.com/authorize?'
                   + 'client_id=' + client_id
-                  + '&redirect_uri=' + redirect + port
+                  + '&redirect_uri=' + redirect
                   + '&scope=user-read-recently-played%20playlist-modify-public%20playlist-modify-private'
                   + '&response_type=token'
                   + '&state=123';
