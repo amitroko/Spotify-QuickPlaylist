@@ -22,8 +22,15 @@ class PlaylistGenerator extends Component {
 
     async createNewPlaylist(){    //create a new playlist and populate it with the user's recently played tracks
         let userID = '';
-        await spotifyWebAPI.getMe()   //retrieve the current user and set the userID field accordingly
+        await spotifyWebAPI.getMe()  //retrieve the current user and set the userID field accordingly
         .then((response) => {
+            if (response.hasOwnProperty('error')){
+              this.setState({
+                statusMessage: 'Error: failed to fetch user'
+              });
+              this.resetState();
+              return;
+            }
             console.log(response.id);
             userID = response.id;
         });
@@ -36,31 +43,60 @@ class PlaylistGenerator extends Component {
         "collaborative": this.state.isCollaborative,
         "description": this.state.playlistDescription})
             .then((response) => {
+              if (response.hasOwnProperty('error')){
+                this.setState({
+                  statusMessage: 'Error: failed to create new playlist'
+                });
+                this.resetState();
+                return;
+              }
             newPlaylistID = response.id;
             });
 
         let tracklist = [];
         await spotifyWebAPI.getMyRecentlyPlayedTracks({"limit": this.state.addSongs}) //retrieve recently played tracks up to user selecte limit and save them
         .then((response) => {
+          if (response.hasOwnProperty('error')){
+            this.setState({
+              statusMessage: 'Error: failed to read recently played tracks user'
+            });
+            this.resetState();
+            return;
+          }
             for(var i = 0; i < response.items.length; i++){
             tracklist.push("spotify:track:"+response.items[i].track.id);
             }
         })
 
         await spotifyWebAPI.addTracksToPlaylist(   //add recently played tracks to playlist
-        userID,
-        newPlaylistID,
-        tracklist
-        );
-
-        this.setState({   //return the input fields to their default values
-          statusMessage: 'Playlist "' + this.state.playlistName + '" created',
-          playlistName: 'New Playlist',
-          playlistDescription: ':)',
-          isPrivate: false,
-          isCollaborative: false,
-          addSongs: 10,
+          userID,
+          newPlaylistID,
+          tracklist
+        )
+        .then((response) => {
+          if (response.hasOwnProperty('error')){
+            this.setState({
+              statusMessage: 'Error: failed to add tracks to playlist'
+            });
+            this.resetState();
+            return;
+          }
         });
+
+        this.setState({
+          statusMessage: 'Playlist "' + this.state.playlistName + '" created'
+        });
+        this.resetState();
+    }
+
+    resetState() {
+      this.setState({   //return the input fields to their default values
+        playlistName: 'New Playlist',
+        playlistDescription: ':)',
+        isPrivate: false,
+        isCollaborative: false,
+        addSongs: 10,
+      });
     }
 
     handleNameChange = (event) => this.setState({playlistName: event.target.value});
