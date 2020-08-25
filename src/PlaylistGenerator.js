@@ -12,7 +12,7 @@ class PlaylistGenerator extends Component {
         super();
         this.state = {
             playlistName: 'New Playlist',
-            playlistDescription: ':)',
+            playlistDescription: 'Generated using QuickPlaylist @ spotify-quickplaylist.herokuapp.com',
             isPrivate: false,
             isCollaborative: false,
             addSongs: 10,
@@ -92,7 +92,7 @@ class PlaylistGenerator extends Component {
     resetState() {
       this.setState({   //return the input fields to their default values
         playlistName: 'New Playlist',
-        playlistDescription: ':)',
+        playlistDescription: 'Generated using QuickPlaylist @ spotify-quickplaylist.herokuapp.com',
         isPrivate: false,
         isCollaborative: false,
         addSongs: 10,
