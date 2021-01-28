@@ -23,65 +23,65 @@ class PlaylistGenerator extends Component {
     async createNewPlaylist(){    //create a new playlist and populate it with the user's recently played tracks
         let userID = '';
         await spotifyWebAPI.getMe()  //retrieve the current user and set the userID field accordingly
-        .then((response) => {
-            if (response.hasOwnProperty('error')){
-              this.setState({
-                statusMessage: 'Error: failed to fetch user'
-              });
-              this.resetState();
-              return;
-            }
-            console.log(response.id);
+          .then((response) => {
             userID = response.id;
-        });
+          })
+          .catch((error) => {
+            this.setState({
+              statusMessage: 'Error: failed to fetch user'
+            });
+            console.log(error);
+            this.resetState();
+            return;
+          });
 
         let newPlaylistID = '';
         await spotifyWebAPI.createPlaylist(   //create a new playlist and save its ID
-        userID,
-        {"name": this.state.playlistName,
-        "public": !(this.state.isPrivate),
-        "collaborative": this.state.isCollaborative,
-        "description": this.state.playlistDescription})
-            .then((response) => {
-              if (response.hasOwnProperty('error')){
-                this.setState({
-                  statusMessage: 'Error: failed to create new playlist'
-                });
-                this.resetState();
-                return;
-              }
+          userID,
+          {"name": this.state.playlistName,
+          "public": !(this.state.isPrivate),
+          "collaborative": this.state.isCollaborative,
+          "description": this.state.playlistDescription}
+        )
+          .then((response) => {
             newPlaylistID = response.id;
+          })
+          .catch((error) => {
+            this.setState({
+              statusMessage: 'Error: failed to create new playlist'
             });
+            console.log(error);
+            this.resetState();
+            return;
+          });
 
         let tracklist = [];
         await spotifyWebAPI.getMyRecentlyPlayedTracks({"limit": this.state.addSongs}) //retrieve recently played tracks up to user selecte limit and save them
-        .then((response) => {
-          if (response.hasOwnProperty('error')){
+          .then((response) => {
+            for(var i = 0; i < response.items.length; i++){
+              tracklist.push("spotify:track:"+response.items[i].track.id);
+            }
+          })
+          .catch((error) => {
             this.setState({
-              statusMessage: 'Error: failed to read recently played tracks user'
+              statusMessage: 'Error: failed to read recently played tracks of user'
             });
             this.resetState();
             return;
-          }
-            for(var i = 0; i < response.items.length; i++){
-            tracklist.push("spotify:track:"+response.items[i].track.id);
-            }
-        })
+          });
 
         await spotifyWebAPI.addTracksToPlaylist(   //add recently played tracks to playlist
           userID,
           newPlaylistID,
           tracklist
         )
-        .then((response) => {
-          if (response.hasOwnProperty('error')){
+          .catch((error) => {
             this.setState({
               statusMessage: 'Error: failed to add tracks to playlist'
             });
             this.resetState();
             return;
-          }
-        });
+          });
 
         this.setState({
           statusMessage: 'Playlist "' + this.state.playlistName + '" created'
